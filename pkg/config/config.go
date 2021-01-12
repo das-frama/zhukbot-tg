@@ -2,13 +2,18 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
 // Config main app configuration struct.
 type Config struct {
 	Bot struct {
-		Mode string `json:"mode"`
+		Token string
+		Mode  string `json:"mode"`
+	}
+	DB struct {
+		URL string
 	}
 }
 
@@ -26,6 +31,19 @@ func LoadConfig(filepath string) (Config, error) {
 	err = json.NewDecoder(file).Decode(&config)
 	if err != nil {
 		return config, err
+	}
+
+	// Get env.
+	// Get bot api token from env.
+	config.Bot.Token = os.Getenv("BOT_TOKEN")
+	if config.Bot.Token == "" {
+		return config, fmt.Errorf("$BOT_TOKEN must be set")
+	}
+
+	// Database URL
+	config.DB.URL = os.Getenv("DATABASE_URL")
+	if config.DB.URL == "" {
+		return config, fmt.Errorf("$DATABASE_URL must be set")
 	}
 
 	return config, nil

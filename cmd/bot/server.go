@@ -1,20 +1,17 @@
 package main
 
 import (
+	"context"
 	"das-frama/zhukbot-tg/pkg/bot"
-	"das-frama/zhukbot-tg/pkg/command"
 	"das-frama/zhukbot-tg/pkg/config"
+	"fmt"
 	"log"
 	"os"
+
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 func main() {
-	// Get bot api token from env.
-	token := os.Getenv("BOT_TOKEN")
-	if token == "" {
-		log.Fatalln("$BOT_TOKEN must be set.")
-	}
-
 	// Config.
 	cfg, err := config.LoadConfig("config.json")
 	if err != nil {
@@ -23,14 +20,15 @@ func main() {
 
 	// Setup dependencies.
 	// DB Conn.
-	//conn, err := sql.Open("sqlite3", cfg.DB.Path)
-	//if err != nil {
-	//	log.Fatalln(err)
-	//}
-	//defer conn.Close()
+	conn, err := pgxpool.Connect(context.Background(), cfg.DB.URL)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer conn.Close()
 
 	// Create telegram bot object.
-	tgBot := bot.New(token)
+	tgBot := bot.New(cfg.Bot.Token)
 
 	// Get updates channel.
 	updates, err := tgBot.GetUpdatesChan(bot.UpdateConfig{
@@ -47,39 +45,13 @@ func main() {
 		if update.Message == nil {
 			continue
 		}
-		// if ok, err := db.IsChatActive(update.Message.Chat.ID); !ok && err == nil {
-		// continue
-		// }
 
 		// Log incoming message.
 		log.Printf("[%s] %s", update.Message.From.Username, update.Message.Text)
 
 		// Check if message is command.
 		if update.Message.IsCommand() {
-			cmd := update.Message.Command()
-			result, err := command.Process(cmd, update.Message, cfg)
-			if err != nil {
-				result.Text = command.UcFirst(err.Error()) + "."
-				log.Println(err)
-			}
-			// Send message.
-			if result.Text != "" {
-				_, err = tgBot.SendMessage(bot.SendMessageConfig{
-					ChatID: update.Message.Chat.ID,
-					Text:   result.Text,
-				})
-				if err != nil {
-					log.Println(err)
-				}
-			} else if result.PhotoURL != "" {
-				_, err = tgBot.SendPhoto(bot.SendPhotoConfig{
-					ChatID: update.Message.Chat.ID,
-					Photo:  result.PhotoURL,
-				})
-				if err != nil {
-					log.Println(err)
-				}
-			}
+			//
 		}
 
 	}

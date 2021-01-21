@@ -11,15 +11,47 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+-- Дамп структуры для таблица public.chats
+CREATE TABLE IF NOT EXISTS "chats" (
+	"id" INTEGER NOT NULL,
+	"type" VARCHAR(16) NULL DEFAULT NULL,
+	"title" VARCHAR(1024) NULL DEFAULT NULL,
+	"username" VARCHAR(1024) NULL DEFAULT NULL,
+	"first_name" VARCHAR(1024) NULL DEFAULT NULL,
+	"last_name" VARCHAR(1024) NULL DEFAULT NULL,
+	"slow_mode_delay" INTEGER NULL DEFAULT NULL,
+	"permissions" JSON NULL DEFAULT NULL,
+	PRIMARY KEY ("id")
+);
+
+-- Экспортируемые данные не выделены.
+
 -- Дамп структуры для таблица public.users
 CREATE TABLE IF NOT EXISTS "users" (
-	"id" INTEGER NOT NULL DEFAULT 'nextval(''users_id_seq''::regclass)',
+	"id" INTEGER NOT NULL,
 	"first_name" VARCHAR(1024) NOT NULL,
 	"last_name" VARCHAR(1024) NULL DEFAULT NULL,
 	"username" VARCHAR(1024) NULL DEFAULT NULL,
 	"language_code" VARCHAR(10) NULL DEFAULT NULL,
 	"can_join_groups" BOOLEAN NULL DEFAULT NULL,
-	"can_read_all_group_messages" BOOLEAN NULL DEFAULT NULL
+	"can_read_all_group_messages" BOOLEAN NULL DEFAULT NULL,
+	PRIMARY KEY ("id")
+);
+
+-- Экспортируемые данные не выделены.
+
+-- Дамп структуры для таблица public.zhuks
+CREATE TABLE IF NOT EXISTS "zhuks" (
+	"id" INTEGER NOT NULL DEFAULT 'nextval(''zhuks_id_seq''::regclass)',
+	"user_id" INTEGER NOT NULL,
+	"name" VARCHAR(1024) NOT NULL,
+	"photo" VARCHAR(1024) NULL DEFAULT NULL,
+	"chat_id" INTEGER NOT NULL,
+	INDEX "zhuks_chat_id_idx" ("chat_id"),
+	INDEX "zhuks_user_id_idx" ("user_id"),
+	PRIMARY KEY ("id"),
+	CONSTRAINT "FK_zhuks_chats" FOREIGN KEY ("chat_id") REFERENCES "public"."chats" ("id") ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT "FK_zhuks_users" FOREIGN KEY ("user_id") REFERENCES "public"."users" ("id") ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- Экспортируемые данные не выделены.

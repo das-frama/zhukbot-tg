@@ -55,8 +55,10 @@ func main() {
 		// Check if message is command.
 		if update.Message.IsCommand() {
 			// If command is /start.
-			if update.Message.Command() == "start" {
-				err := db.CreateUser(postgres.User{
+			var err error
+			switch update.Message.Command() {
+			case "start":
+				err = db.CreateUser(postgres.User{
 					ID:                      update.Message.From.ID,
 					FirstName:               update.Message.From.FirstName,
 					LastName:                update.Message.From.LastName,
@@ -65,9 +67,29 @@ func main() {
 					CanJoinGroups:           update.Message.From.CanJoinGroups,
 					CanReadAllGroupMessages: update.Message.From.CanReadAllGroupMessages,
 				})
-				if err != nil {
-					log.Println(err.Error())
-				}
+				err = db.CreateChat(postgres.Chat{
+					ID:            update.Message.Chat.ID,
+					Type:          update.Message.Chat.Type,
+					Title:         update.Message.Chat.Title,
+					Username:      update.Message.Chat.Username,
+					FirstName:     update.Message.Chat.FirstName,
+					LastName:      update.Message.Chat.LastName,
+					SlowModeDelay: update.Message.Chat.SlowModeDelay,
+				})
+			case "zhuk":
+				id, _ := db.CreateZhuk(postgres.Zhuk{
+					Name:   "Новый Жучара",
+					UserID: update.Message.From.ID,
+					ChatID: update.Message.Chat.ID,
+				})
+				_, err = tgBot.SendMessage(bot.SendMessageConfig{
+					ChatID: update.Message.Chat.ID,
+					Text:   fmt.Sprintf("Новый жучара с ID %d создан", id),
+				})
+			}
+
+			if err != nil {
+				log.Println(err.Error())
 			}
 		}
 

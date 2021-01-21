@@ -1,0 +1,5 @@
+package zhuk
+
+func NewZhuk() {
+
+}

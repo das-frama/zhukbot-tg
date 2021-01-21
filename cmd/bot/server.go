@@ -4,6 +4,7 @@ import (
 	"context"
 	"das-frama/zhukbot-tg/pkg/bot"
 	"das-frama/zhukbot-tg/pkg/config"
+	"das-frama/zhukbot-tg/pkg/postgres"
 	"fmt"
 	"log"
 	"os"
@@ -26,6 +27,8 @@ func main() {
 		os.Exit(1)
 	}
 	defer conn.Close()
+	// DB Struct.
+	db := postgres.New(conn)
 
 	// Create telegram bot object.
 	tgBot := bot.New(cfg.Bot.Token)
@@ -51,7 +54,21 @@ func main() {
 
 		// Check if message is command.
 		if update.Message.IsCommand() {
-			//
+			// If command is /start.
+			if update.Message.Command() == "start" {
+				err := db.CreateUser(postgres.User{
+					ID:                      update.Message.From.ID,
+					FirstName:               update.Message.From.FirstName,
+					LastName:                update.Message.From.LastName,
+					Username:                update.Message.From.Username,
+					LanguageCode:            update.Message.From.LanguageCode,
+					CanJoinGroups:           update.Message.From.CanJoinGroups,
+					CanReadAllGroupMessages: update.Message.From.CanReadAllGroupMessages,
+				})
+				if err != nil {
+					log.Println(err.Error())
+				}
+			}
 		}
 
 	}

@@ -5,6 +5,7 @@ import (
 	"das-frama/zhukbot-tg/pkg/bot"
 	"das-frama/zhukbot-tg/pkg/config"
 	"das-frama/zhukbot-tg/pkg/postgres"
+	"das-frama/zhukbot-tg/pkg/zhuk"
 	"fmt"
 	"log"
 	"os"
@@ -90,6 +91,17 @@ func main() {
 
 			if err != nil {
 				log.Println(err.Error())
+			}
+		} else {
+			response, err := zhuk.AnalyzeText(update.Message.Text)
+			if err != nil {
+				log.Println(err.Error())
+			}
+			if response != "" {
+				_, err = tgBot.SendMessage(bot.SendMessageConfig{
+					ChatID: update.Message.Chat.ID,
+					Text:   response,
+				})
 			}
 		}
 

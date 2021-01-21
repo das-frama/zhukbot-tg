@@ -1,5 +1,7 @@
 package postgres
 
+import "das-frama/zhukbot-tg/pkg/zhuk"
+
 type User struct {
 	ID                      int    `db:"id"`
 	FirstName               string `db:"first_name"`
@@ -26,4 +28,13 @@ type Zhuk struct {
 	Photo  string `db:"photo,omitempty"`
 	UserID int    `db:"user_id"`
 	ChatID int    `db:"chat_id"`
+	RoleID int    `db:"chat_id,omitempty"`
+}
+
+type Role struct {
+	ID          int       `db:"id"`
+	Name        string    `db:"name"`
+	Description string    `db:"description"`
+	Location    string    `db:"location"`
+	Type        zhuk.Type `db:"type"`
 }

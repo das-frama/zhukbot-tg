@@ -35,16 +35,12 @@ func LoadConfig(filepath string) (Config, error) {
 
 	// Get env.
 	// Get bot api token from env.
-	config.Bot.Token = os.Getenv("BOT_TOKEN")
-	if config.Bot.Token == "" {
-		return config, fmt.Errorf("$BOT_TOKEN must be set")
+	env, err := GetEnv()
+	if err != nil {
+		return config, fmt.Errorf(".env file does not exists, make sure you copy .env.example to .env")
 	}
-
-	// Database URL
-	config.DB.URL = os.Getenv("DATABASE_URL")
-	if config.DB.URL == "" {
-		return config, fmt.Errorf("$DATABASE_URL must be set")
-	}
+	config.Bot.Token = env.BotToken
+	config.DB.URL = env.BotToken
 
 	return config, nil
 }

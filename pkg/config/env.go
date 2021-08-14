@@ -41,6 +41,11 @@ func GetEnv() (Env, error) {
 		s := strings.Split(envLine, "=")
 		envKey, envValueStr := strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
 
+		// Check if env already exist outside .env file.
+		if envValueOS, ok := os.LookupEnv(envKey); ok {
+			envValueStr = envValueOS
+		}
+
 		// Find a propert struct type to pupulate.
 		for i := 0; i < t.NumField(); i++ {
 			tag := t.Field(i).Tag.Get("env")

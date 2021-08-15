@@ -9,82 +9,99 @@ import (
 )
 
 type db struct {
-	chatsFile *os.File
-	usersFile *os.File
+	files map[string]*os.File
 }
 
 func New(dir string) (db, error) {
-	d := db{}
-
-	names, err := createFilesIfNotExists(dir, []string{"chats.txt", "users.txt"})
-	if err != nil {
-		return d, nil
+	d := db{
+		files: map[string]*os.File{
+			"chats.txt": nil,
+			"users.txt": nil,
+			"zhuks.txt": nil,
+		},
 	}
 
-	if d.chatsFile, err = os.OpenFile(names[0], os.O_RDWR, 0755); err != nil {
-		return d, err
-	}
-	if d.usersFile, err = os.OpenFile(names[1], os.O_RDWR, 0755); err != nil {
-		return d, err
-	}
-
-	if bytes, _ := ioutil.ReadAll(d.chatsFile); len(bytes) == 0 {
-		chatTypes := fetchTypes(Chat{})
-		d.chatsFile.WriteString(strings.Join(chatTypes, "\t"))
-	}
-	if bytes, _ := ioutil.ReadAll(d.usersFile); len(bytes) == 0 {
-		userTypes := fetchTypes(User{})
-		d.usersFile.WriteString(strings.Join(userTypes, "\t"))
+	for name := range d.files {
+		var err error
+		d.files[name], err = createOrOpenFile(path.Join(dir, name))
+		if err != nil {
+			return d, err
+		}
+		// Populate header if empty.
+		if bytes, _ := ioutil.ReadAll(d.files[name]); len(bytes) == 0 {
+			s := findStructByFile(name)
+			d.files[name].WriteString(strings.Join(fetchTypes(s), "\t") + "\n")
+		}
 	}
 
 	return d, nil
 }
 
 func (db *db) Close() {
-	db.usersFile.Close()
-	db.chatsFile.Close()
-}
-
-func createFilesIfNotExists(dir string, names []string) ([]string, error) {
-	// list of all files.
-	paths := make([]string, len(names))
-	for i, name := range names {
-		paths[i] = path.Join(dir, name)
-		if fileExists(paths[i]) {
-			continue
-		}
-
-		file, err := os.Create(paths[i])
-		if err != nil {
-			return paths, err
-		}
+	for _, file := range db.files {
 		file.Close()
 	}
-
-	return paths, nil
 }
 
-// func hasHeader(file *os.File) bool {
-// 	scanner := bufio.NewScanner(file)
-// 	for scanner.Scan() {
-// 		line := strings.TrimSpace(scanner.Text())
-// 		if strings.HasPrefix(line, "#") {
-// 			continue
-// 		}
+func (db *db) Insert(name string, s Stringer) {
+	file := db.files[name]
+	file.WriteString(s.ToString() + "\n")
+	file.Seek(0, 0)
+}
 
+func findStructByFile(name string) interface{} {
+	if name == "chats.txt" {
+		return Chat{}
+	} else if name == "users.txt" {
+		return User{}
+	} else if name == "zhuks.txt" {
+		return Zhuk{}
+	}
+	return nil
+}
+
+// func fileNames(mm map[string]*os.File) []string {
+// 	keys := make([]string, 0, len(mm))
+// 	for m := range mm {
+// 		keys = append(keys, m)
 // 	}
+// 	return keys
 // }
+
+func createOrOpenFile(name string) (*os.File, error) {
+	if fileExists(name) {
+		return os.OpenFile(name, os.O_RDWR|os.O_APPEND, 0755)
+	}
+
+	return os.Create(name)
+}
 
 func fetchTypes(schema interface{}) []string {
 	var headers []string
 
 	t := reflect.TypeOf(schema)
 	for i := 0; i < t.NumField(); i++ {
-		headers = append(headers, t.Field(i).Tag.Get("txtdb"))
+		if t.Field(i).PkgPath == "" {
+			headers = append(headers, t.Field(i).Tag.Get("txtdb"))
+		}
 	}
 
 	return headers
 }
+
+// func fetchValues(schema interface{}) []string {
+// 	var values []string
+
+// 	v := reflect.ValueOf(schema)
+// 	for i := 0; i < v.NumField(); i++ {
+// 		if v.Field(i).Type().PkgPath() == "" {
+// 			value := v.Field(i).Elem().
+// 			values = append(values, value.(string))
+// 		}
+// 	}
+
+// 	return values
+// }
 
 func fileExists(name string) bool {
 	_, err := os.Stat(name)

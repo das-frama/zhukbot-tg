@@ -19,3 +19,12 @@ type User struct {
 	CanJoinGroups           bool   `txtdb:"can_join_groups"`
 	CanReadAllGroupMessages bool   `txtdb:"can_read_all_group_messages"`
 }
+
+type Zhuk struct {
+	ID     int    `db:"id"`
+	Name   string `db:"name"`
+	Photo  string `db:"photo,omitempty"`
+	UserID int    `db:"user_id"`
+	ChatID int    `db:"chat_id"`
+	RoleID int    `db:"chat_id,omitempty"`
+}

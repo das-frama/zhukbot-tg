@@ -30,3 +30,11 @@ type Zhuk struct {
 	Type Type
 	Name string
 }
+
+type Queryer interface {
+	// CheckIfSchemaEmpty() bool
+	// MigrateSchema(string) error
+	// CreateUser(User) error
+	// CreateChat(Chat) error
+	// CreateZhuk(Zhuk) (int, error)
+}

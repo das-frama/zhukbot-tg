@@ -13,7 +13,7 @@ type Config struct {
 		Mode  string `json:"mode"`
 	}
 	DB struct {
-		URL string
+		Path string `json:"path"`
 	}
 }
 
@@ -40,7 +40,6 @@ func LoadConfig(filepath string) (Config, error) {
 		return config, fmt.Errorf(".env file does not exists, make sure you copy .env.example to .env")
 	}
 	config.Bot.Token = env.BotToken
-	config.DB.URL = env.BotToken
 
 	return config, nil
 }

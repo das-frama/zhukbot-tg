@@ -16,5 +16,10 @@
 
 # IDE catalogs.
 .idea
+.vscode
 .vs
 
+go.sum
+
+# txtdb
+db/*.txt

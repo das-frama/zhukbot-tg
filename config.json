@@ -1,5 +1,8 @@
 {
   "bot": {
     "mode": "longpolling"
+  },
+  "db": {
+    "path": "db"
   }
 }

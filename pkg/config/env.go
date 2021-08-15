@@ -9,8 +9,7 @@ import (
 )
 
 type Env struct {
-	BotToken     string `env:"BOT_TOKEN"`
-	DBConnection string `env:"DB_CONNECTION"`
+	BotToken string `env:"BOT_TOKEN"`
 }
 
 func GetEnv() (Env, error) {

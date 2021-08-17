@@ -23,3 +23,5 @@ go.sum
 
 # txtdb
 db/*.txt
+
+.env

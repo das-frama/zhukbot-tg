@@ -2,16 +2,14 @@ package txtdb
 
 import "fmt"
 
-type Stringer interface {
+type Tabler interface {
+	Key() int
+	Format() string
 	ToString() string
 }
 
-type file struct {
-	FileName string
-}
-
+// Chat
 type Chat struct {
-	file
 	ID            int    `txtdb:"id"`
 	Type          string `txtdb:"type"`
 	Title         string `txtdb:"title"`
@@ -21,12 +19,20 @@ type Chat struct {
 	SlowModeDelay int    `txtdb:"slow_mode_delay"`
 }
 
-func (c Chat) ToString() string {
-	return fmt.Sprintf("%d\t%s\t%s\t%s\t%s\t%s\t%d", c.ID, c.Type, c.Title, c.Username, c.FileName, c.LastName, c.SlowModeDelay)
+func (c Chat) Key() int {
+	return c.ID
 }
 
+func (c Chat) Format() string {
+	return "%d\t%s\t%s\t%s\t%s\t%s\t%d"
+}
+
+func (c Chat) ToString() string {
+	return fmt.Sprintf(c.Format(), c.ID, c.Type, c.Title, c.Username, c.FirstName, c.LastName, c.SlowModeDelay)
+}
+
+// User
 type User struct {
-	file
 	ID                      int    `txtdb:"id"`
 	Username                string `txtdb:"username"`
 	FirstName               string `txtdb:"first_name"`
@@ -36,12 +42,20 @@ type User struct {
 	CanReadAllGroupMessages bool   `txtdb:"can_read_all_group_messages"`
 }
 
-func (u User) ToString() string {
-	return fmt.Sprintf("%d\t%s\t%s\t%s\t%s\t%t\t%t", u.ID, u.Username, u.FirstName, u.LastName, u.LanguageCode, u.CanJoinGroups, u.CanReadAllGroupMessages)
+func (u User) Key() int {
+	return u.ID
 }
 
+func (u User) Format() string {
+	return "%d\t%s\t%s\t%s\t%s\t%t\t%t"
+}
+
+func (u User) ToString() string {
+	return fmt.Sprintf(u.Format(), u.ID, u.Username, u.FirstName, u.LastName, u.LanguageCode, u.CanJoinGroups, u.CanReadAllGroupMessages)
+}
+
+// Zhuk
 type Zhuk struct {
-	file
 	ID     int    `txtdb:"id"`
 	Name   string `txtdb:"name"`
 	Photo  string `txtdb:"photo"`
@@ -50,6 +64,14 @@ type Zhuk struct {
 	RoleID int    `txtdb:"role_id"`
 }
 
+func (z Zhuk) Key() int {
+	return z.ID
+}
+
+func (z Zhuk) Format() string {
+	return "%d\t%s\t%s\t%d\t%d\t%d"
+}
+
 func (z Zhuk) ToString() string {
-	return fmt.Sprintf("%d\t%s\t%s\t%d\t%d\t%d", z.ID, z.Name, z.Photo, z.UserID, z.ChatID, z.RoleID)
+	return fmt.Sprintf(z.Format(), z.ID, z.Name, z.Photo, z.UserID, z.ChatID, z.RoleID)
 }

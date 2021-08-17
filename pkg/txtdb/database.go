@@ -1,10 +1,13 @@
 package txtdb
 
 import (
+	"bufio"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
@@ -48,13 +51,96 @@ func (db *db) Close() {
 	}
 }
 
-func (db *db) Insert(name string, s Stringer) {
+func (db *db) Insert(name string, t Tabler) {
 	file := db.files[name]
-	file.WriteString(s.ToString() + "\n")
+	file.WriteString(t.ToString() + "\n")
 	file.Seek(0, 0)
 }
 
-func findStructByFile(name string) interface{} {
+func (db *db) FetchByID(name string, id int) (Tabler, error) {
+	t, err := db.fetch(name, "id", strconv.FormatInt(int64(id), 10))
+	if err != nil {
+		return t, err
+	}
+
+	return t, nil
+}
+
+func (db *db) fetch(name string, key string, value string) (Tabler, error) {
+	s := findStructByFile(name)
+	file := db.files[name]
+	file.Seek(0, 0)
+
+	// Read headers.
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	if err := scanner.Err(); err != nil {
+		return s, err
+	}
+	headers := strings.Split(scanner.Text(), "\t")
+	if len(headers) == 1 {
+		return s, fmt.Errorf("empty header in %s file", file.Name())
+	}
+
+	// Find header index.
+	idx := search(key, headers)
+	if idx == -1 {
+		return s, fmt.Errorf("there is no any header in %s file", file.Name())
+	}
+
+	// Find the right record.
+	record := make([]string, 0, len(headers))
+	for scanner.Scan() {
+		ss := strings.Split(scanner.Text(), "\t")
+		if ss[idx] == value {
+			record = ss
+			break
+		}
+	}
+	if len(record) == 0 {
+		return s, fmt.Errorf("the record was not found")
+	}
+
+	// Explode line to the struct.
+	t := reflect.TypeOf(s)
+	v := reflect.ValueOf(&s).Elem()
+	for i := 0; i < t.NumField(); i++ {
+		ft := t.Field(i)
+
+		idx = search(ft.Tag.Get("txtdb"), headers)
+		if idx != -1 {
+			tmp := reflect.New(v.Elem().Type()).Elem()
+			tmp.Set(v.Elem())
+
+			switch ft.Type.Kind() {
+			case reflect.String:
+				tmp.Field(i).SetString(record[idx])
+			case reflect.Int:
+				intVal, _ := strconv.ParseInt(record[idx], 10, 64)
+				tmp.Field(i).SetInt(intVal)
+			case reflect.Bool:
+				boolVal, _ := strconv.ParseBool(record[idx])
+				tmp.Field(i).SetBool(boolVal)
+			}
+			v.Set(tmp)
+		}
+
+	}
+
+	return s, nil
+}
+
+func search(needle string, haystack []string) int {
+	for i, h := range haystack {
+		if h == needle {
+			return i
+		}
+	}
+
+	return -1
+}
+
+func findStructByFile(name string) Tabler {
 	if name == "chats.txt" {
 		return Chat{}
 	} else if name == "users.txt" {
@@ -64,14 +150,6 @@ func findStructByFile(name string) interface{} {
 	}
 	return nil
 }
-
-// func fileNames(mm map[string]*os.File) []string {
-// 	keys := make([]string, 0, len(mm))
-// 	for m := range mm {
-// 		keys = append(keys, m)
-// 	}
-// 	return keys
-// }
 
 func createOrOpenFile(name string) (*os.File, error) {
 	if fileExists(name) {
@@ -93,20 +171,6 @@ func fetchTypes(schema interface{}) []string {
 
 	return headers
 }
-
-// func fetchValues(schema interface{}) []string {
-// 	var values []string
-
-// 	v := reflect.ValueOf(schema)
-// 	for i := 0; i < v.NumField(); i++ {
-// 		if v.Field(i).Type().PkgPath() == "" {
-// 			value := v.Field(i).Elem().
-// 			values = append(values, value.(string))
-// 		}
-// 	}
-
-// 	return values
-// }
 
 func fileExists(name string) bool {
 	_, err := os.Stat(name)

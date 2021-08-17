@@ -2,6 +2,7 @@ package main
 
 import (
 	"das-frama/zhukbot-tg/pkg/txtdb"
+	"fmt"
 	"log"
 )
 
@@ -12,15 +13,21 @@ func main() {
 	}
 	defer db.Close()
 
-	user := txtdb.User{
-		ID:                      1,
-		FirstName:               "Andrey",
-		LastName:                "Galaktionov",
-		Username:                "das_frama",
-		LanguageCode:            "ru",
-		CanJoinGroups:           true,
-		CanReadAllGroupMessages: true,
+	// user := txtdb.User{
+	// 	ID:                      1,
+	// 	FirstName:               "Andrey",
+	// 	LastName:                "Galaktionov",
+	// 	Username:                "das_frama",
+	// 	LanguageCode:            "ru",
+	// 	CanJoinGroups:           true,
+	// 	CanReadAllGroupMessages: true,
+	// }
+
+	// db.Insert("users.txt", user)
+	user, err := db.FetchByID("users.txt", 3)
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	db.Insert("users.txt", user)
+	fmt.Println(user)
 }

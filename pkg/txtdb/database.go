@@ -21,6 +21,11 @@ func New(dir string) (db, error) {
 		},
 	}
 
+	// Check if directory exists.
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.Mkdir(dir, os.ModePerm)
+	}
+
 	for name := range d.files {
 		var err error
 		d.files[name], err = createOrOpenFile(path.Join(dir, name))

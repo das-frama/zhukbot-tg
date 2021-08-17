@@ -13,18 +13,7 @@ func main() {
 	}
 	defer db.Close()
 
-	// user := txtdb.User{
-	// 	ID:                      1,
-	// 	FirstName:               "Andrey",
-	// 	LastName:                "Galaktionov",
-	// 	Username:                "das_frama",
-	// 	LanguageCode:            "ru",
-	// 	CanJoinGroups:           true,
-	// 	CanReadAllGroupMessages: true,
-	// }
-
-	// db.Insert("users.txt", user)
-	user, err := db.FetchByID("users.txt", 3)
+	user, err := db.FetchByUsername("users.txt", "nickmann")
 	if err != nil {
 		log.Fatalln(err)
 	}

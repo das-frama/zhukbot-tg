@@ -66,6 +66,15 @@ func (db *db) FetchByID(name string, id int) (Tabler, error) {
 	return t, nil
 }
 
+func (db *db) FetchByUsername(name string, username string) (Tabler, error) {
+	t, err := db.fetch(name, "username", username)
+	if err != nil {
+		return t, err
+	}
+
+	return t, nil
+}
+
 func (db *db) fetch(name string, key string, value string) (Tabler, error) {
 	s := findStructByFile(name)
 	file := db.files[name]

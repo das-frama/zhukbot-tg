@@ -22,6 +22,8 @@ func main() {
 	}
 	defer db.Close()
 
+	cfg.TxtDB = &db
+
 	// Create telegram bot object.
 	tbot := bot.New(cfg.Bot.Token)
 
@@ -56,7 +58,6 @@ func main() {
 				Text:                result.Text,
 				DisableNotification: true,
 			})
-
 		}
 	}
 

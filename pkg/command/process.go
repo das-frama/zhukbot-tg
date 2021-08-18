@@ -3,7 +3,9 @@ package command
 import (
 	"das-frama/zhukbot-tg/pkg/bot"
 	"das-frama/zhukbot-tg/pkg/config"
+	"das-frama/zhukbot-tg/pkg/txtdb"
 	"fmt"
+	"strconv"
 )
 
 // Result is a result of command process.
@@ -15,6 +17,7 @@ type Result struct {
 
 var commandMap = map[string]func(*bot.Message, config.Config) (Result, error){
 	"start": start,
+	"ping":  ping,
 }
 
 // Process handles the command and returns a response struct.
@@ -40,10 +43,34 @@ func start(message *bot.Message, cfg config.Config) (Result, error) {
 			text = "Привет! К сожалению, бот не умеет работать в одиночных чатах."
 		}
 	case "supergroup":
-		text = "Жукобот запущен внутри группы."
+		ok := cfg.TxtDB.HasRecord("chats.txt", "id", strconv.FormatInt(int64(message.Chat.ID), 10))
+		if ok {
+			text = "Жукобот уже запущен внутри группы."
+		} else {
+			err := cfg.TxtDB.Insert("chats.txt", txtdb.Chat{
+				ID:            message.Chat.ID,
+				Type:          message.Chat.Type,
+				Title:         message.Chat.Title,
+				Username:      message.Chat.Username,
+				FirstName:     message.Chat.FirstName,
+				LastName:      message.Chat.LastName,
+				SlowModeDelay: message.Chat.SlowModeDelay,
+			})
+			if err == nil {
+				text = "Жукобот запущен внутри группы."
+			} else {
+				text = err.Error()
+			}
+		}
 	}
 
 	result.Text = text
 
 	return result, nil
+}
+
+func ping(message *bot.Message, cfg config.Config) (Result, error) {
+	return Result{
+		Text: "хуинг",
+	}, nil
 }

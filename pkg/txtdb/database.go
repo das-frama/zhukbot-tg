@@ -11,12 +11,12 @@ import (
 	"strings"
 )
 
-type db struct {
+type DB struct {
 	files map[string]*os.File
 }
 
-func New(dir string) (db, error) {
-	d := db{
+func New(dir string) (DB, error) {
+	d := DB{
 		files: map[string]*os.File{
 			"chats.txt": nil,
 			"users.txt": nil,
@@ -45,13 +45,13 @@ func New(dir string) (db, error) {
 	return d, nil
 }
 
-func (db *db) Close() {
+func (db *DB) Close() {
 	for _, file := range db.files {
 		file.Close()
 	}
 }
 
-func (db *db) Insert(name string, t Tabler) error {
+func (db *DB) Insert(name string, t Tabler) error {
 	// Check if record already exists.
 	keyField, keyValue := t.Key()
 	if _, err := db.Fetch(name, keyField, keyValue); err != ErrNotFound {
@@ -67,7 +67,7 @@ func (db *db) Insert(name string, t Tabler) error {
 	return err
 }
 
-func (db *db) Update(name string, t Tabler) {
+func (db *DB) Update(name string, t Tabler) {
 	file := db.files[name]
 	file.Seek(0, 0)
 
@@ -98,7 +98,7 @@ func (db *db) Update(name string, t Tabler) {
 	}
 }
 
-func (db *db) Delete(name string, t Tabler) error {
+func (db *DB) Delete(name string, t Tabler) error {
 	file := db.files[name]
 	file.Seek(0, 0)
 
@@ -131,7 +131,7 @@ func (db *db) Delete(name string, t Tabler) error {
 	return nil
 }
 
-func (db *db) Fetch(name string, key string, value string) (Tabler, error) {
+func (db *DB) Fetch(name string, key string, value string) (Tabler, error) {
 	s := findStructByFile(name)
 	file := db.files[name]
 	file.Seek(0, 0)
@@ -193,6 +193,11 @@ func (db *db) Fetch(name string, key string, value string) (Tabler, error) {
 	}
 
 	return s, nil
+}
+
+func (db *DB) HasRecord(name string, key string, value string) bool {
+	_, err := db.Fetch(name, key, value)
+	return err == nil
 }
 
 func search(needle string, haystack []string) int {

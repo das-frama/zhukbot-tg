@@ -1,6 +1,7 @@
 package config
 
 import (
+	"das-frama/zhukbot-tg/pkg/txtdb"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -18,6 +19,7 @@ type Config struct {
 	DB struct {
 		Path string `json:"path"`
 	}
+	TxtDB *txtdb.DB
 }
 
 // LoadConfig creates a struct from file.

@@ -8,10 +8,13 @@ import (
 
 // Config main app configuration struct.
 type Config struct {
+	AdminUserID int
+
 	Bot struct {
 		Token string
 		Mode  string `json:"mode"`
 	}
+
 	DB struct {
 		Path string `json:"path"`
 	}
@@ -40,6 +43,7 @@ func LoadConfig(filepath string) (Config, error) {
 		return config, fmt.Errorf(".env file does not exists, make sure you copy .env.example to .env")
 	}
 	config.Bot.Token = env.BotToken
+	config.AdminUserID = env.AdminUserID
 
 	return config, nil
 }

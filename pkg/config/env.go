@@ -9,7 +9,8 @@ import (
 )
 
 type Env struct {
-	BotToken string `env:"BOT_TOKEN"`
+	BotToken    string `env:"BOT_TOKEN"`
+	AdminUserID int    `env:"ADMIN_USER_ID"`
 }
 
 func GetEnv() (Env, error) {

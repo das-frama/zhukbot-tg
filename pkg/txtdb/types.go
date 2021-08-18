@@ -36,6 +36,7 @@ func (c Chat) ToString() string {
 
 // User
 type User struct {
+	ID                      int    `txtdb:"id"`
 	Username                string `txtdb:"username"`
 	FirstName               string `txtdb:"first_name"`
 	LastName                string `txtdb:"last_name"`
@@ -45,11 +46,11 @@ type User struct {
 }
 
 func (u User) Key() (string, string) {
-	return "username", u.Username
+	return "id", strconv.FormatInt(int64(u.ID), 10)
 }
 
 func (u User) Format() string {
-	return "%s\t%s\t%s\t%s\t%t\t%t"
+	return "%d\t%s\t%s\t%s\t%s\t%t\t%t"
 }
 
 func (u User) ToString() string {

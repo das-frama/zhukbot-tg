@@ -54,6 +54,7 @@ func (db *db) Close() {
 func (db *db) Insert(name string, t Tabler) error {
 	file := db.files[name]
 	file.Seek(0, 2)
+
 	file.WriteString(t.ToString() + "\n")
 	err := file.Sync()
 
@@ -61,7 +62,33 @@ func (db *db) Insert(name string, t Tabler) error {
 }
 
 func (db *db) Update(name string, t Tabler) {
+	file := db.files[name]
+	file.Seek(0, 0)
 
+	found := false
+	writer := bufio.NewWriter(file)
+	scanner := bufio.NewScanner(file)
+	// Scan header.
+	scanner.Scan()
+	writer.Write(scanner.Bytes())
+	writer.Write([]byte("\n"))
+
+	for scanner.Scan() {
+		ss := strings.Split(scanner.Text(), "\t")
+		if ss[0] == t.Key() {
+			writer.WriteString(t.ToString() + "\n")
+			found = true
+		} else {
+			writer.Write(scanner.Bytes())
+			writer.Write([]byte("\n"))
+		}
+	}
+
+	if found {
+		file.Truncate(0)
+		file.Seek(0, 0)
+		writer.Flush()
+	}
 }
 
 func (db *db) Delete(name string, t Tabler) error {

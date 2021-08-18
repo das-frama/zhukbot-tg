@@ -13,8 +13,13 @@ func main() {
 	defer db.Close()
 
 	user := txtdb.User{
-		Username: "das_frama",
+		Username:     "Who_knowsme",
+		FirstName:    "Sash",
+		LastName:     "Nowikowa",
+		LanguageCode: "ru",
 	}
-	// db.Insert("users.txt", user)
-	db.Delete("users.txt", user)
+
+	db.Insert("users.txt", user)
+	// db.Update("users.txt", user)
+	// db.Delete("users.txt", user)
 }

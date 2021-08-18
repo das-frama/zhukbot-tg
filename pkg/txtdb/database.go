@@ -57,6 +57,33 @@ func (db *db) Insert(name string, t Tabler) {
 	file.Seek(0, 0)
 }
 
+func (db *db) Delete(name string, t Tabler) error {
+	file := db.files[name]
+	file.Seek(0, 0)
+
+	found := false
+	writer := bufio.NewWriter(file)
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		ss := strings.Split(scanner.Text(), "\t")
+		if ss[0] == t.Key() {
+			found = true
+		} else {
+			writer.Write(scanner.Bytes())
+			writer.Write([]byte("\n"))
+		}
+	}
+
+	if found {
+		file.Truncate(0)
+		file.Seek(0, 0)
+		writer.Flush()
+	}
+
+	return nil
+}
+
 func (db *db) FetchByID(name string, id int) (Tabler, error) {
 	t, err := db.fetch(name, "id", strconv.FormatInt(int64(id), 10))
 	if err != nil {
@@ -107,7 +134,7 @@ func (db *db) fetch(name string, key string, value string) (Tabler, error) {
 		}
 	}
 	if len(record) == 0 {
-		return s, fmt.Errorf("the record was not found")
+		return s, ErrNotFound
 	}
 
 	// Explode line to the struct.
@@ -162,7 +189,7 @@ func findStructByFile(name string) Tabler {
 
 func createOrOpenFile(name string) (*os.File, error) {
 	if fileExists(name) {
-		return os.OpenFile(name, os.O_RDWR|os.O_APPEND, 0755)
+		return os.OpenFile(name, os.O_RDWR, 0755)
 	}
 
 	return os.Create(name)

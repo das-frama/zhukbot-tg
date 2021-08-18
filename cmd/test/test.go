@@ -13,10 +13,14 @@ func main() {
 	}
 	defer db.Close()
 
-	user, err := db.FetchByUsername("users.txt", "nickmann")
+	user, err := db.FetchByUsername("users.txt", "Who_knowsme")
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	fmt.Println(user)
+
+	err = db.Delete("users.txt", user)
+	if err != nil {
+		log.Fatalln(err)
+	}
 }

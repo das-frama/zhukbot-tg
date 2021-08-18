@@ -1,9 +1,12 @@
 package txtdb
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type Tabler interface {
-	Key() int
+	Key() string
 	Format() string
 	ToString() string
 }
@@ -19,8 +22,8 @@ type Chat struct {
 	SlowModeDelay int    `txtdb:"slow_mode_delay"`
 }
 
-func (c Chat) Key() int {
-	return c.ID
+func (c Chat) Key() string {
+	return strconv.FormatInt(int64(c.ID), 10)
 }
 
 func (c Chat) Format() string {
@@ -33,7 +36,6 @@ func (c Chat) ToString() string {
 
 // User
 type User struct {
-	ID                      int    `txtdb:"id"`
 	Username                string `txtdb:"username"`
 	FirstName               string `txtdb:"first_name"`
 	LastName                string `txtdb:"last_name"`
@@ -42,16 +44,16 @@ type User struct {
 	CanReadAllGroupMessages bool   `txtdb:"can_read_all_group_messages"`
 }
 
-func (u User) Key() int {
-	return u.ID
+func (u User) Key() string {
+	return u.Username
 }
 
 func (u User) Format() string {
-	return "%d\t%s\t%s\t%s\t%s\t%t\t%t"
+	return "%s\t%s\t%s\t%s\t%t\t%t"
 }
 
 func (u User) ToString() string {
-	return fmt.Sprintf(u.Format(), u.ID, u.Username, u.FirstName, u.LastName, u.LanguageCode, u.CanJoinGroups, u.CanReadAllGroupMessages)
+	return fmt.Sprintf(u.Format(), u.Username, u.FirstName, u.LastName, u.LanguageCode, u.CanJoinGroups, u.CanReadAllGroupMessages)
 }
 
 // Zhuk
@@ -64,8 +66,8 @@ type Zhuk struct {
 	RoleID int    `txtdb:"role_id"`
 }
 
-func (z Zhuk) Key() int {
-	return z.ID
+func (z Zhuk) Key() string {
+	return strconv.FormatInt(int64(z.ID), 10)
 }
 
 func (z Zhuk) Format() string {

@@ -52,6 +52,12 @@ func (db *db) Close() {
 }
 
 func (db *db) Insert(name string, t Tabler) error {
+	// Check if record already exists.
+	keyField, keyValue := t.Key()
+	if _, err := db.Fetch(name, keyField, keyValue); err != ErrNotFound {
+		return ErrAlreadyExists
+	}
+
 	file := db.files[name]
 	file.Seek(0, 2)
 
@@ -73,9 +79,10 @@ func (db *db) Update(name string, t Tabler) {
 	writer.Write(scanner.Bytes())
 	writer.Write([]byte("\n"))
 
+	_, key := t.Key()
 	for scanner.Scan() {
 		ss := strings.Split(scanner.Text(), "\t")
-		if ss[0] == t.Key() {
+		if ss[0] == key {
 			writer.WriteString(t.ToString() + "\n")
 			found = true
 		} else {
@@ -104,9 +111,10 @@ func (db *db) Delete(name string, t Tabler) error {
 	writer.Write(scanner.Bytes())
 	writer.Write([]byte("\n"))
 
+	_, key := t.Key()
 	for scanner.Scan() {
 		ss := strings.Split(scanner.Text(), "\t")
-		if ss[0] == t.Key() {
+		if ss[0] == key {
 			found = true
 		} else {
 			writer.Write(scanner.Bytes())
@@ -123,25 +131,7 @@ func (db *db) Delete(name string, t Tabler) error {
 	return nil
 }
 
-func (db *db) FetchByID(name string, id int) (Tabler, error) {
-	t, err := db.fetch(name, "id", strconv.FormatInt(int64(id), 10))
-	if err != nil {
-		return t, err
-	}
-
-	return t, nil
-}
-
-func (db *db) FetchByUsername(name string, username string) (Tabler, error) {
-	t, err := db.fetch(name, "username", username)
-	if err != nil {
-		return t, err
-	}
-
-	return t, nil
-}
-
-func (db *db) fetch(name string, key string, value string) (Tabler, error) {
+func (db *db) Fetch(name string, key string, value string) (Tabler, error) {
 	s := findStructByFile(name)
 	file := db.files[name]
 	file.Seek(0, 0)

@@ -6,7 +6,7 @@ import (
 )
 
 type Tabler interface {
-	Key() string
+	Key() (string, string)
 	Format() string
 	ToString() string
 }
@@ -22,8 +22,8 @@ type Chat struct {
 	SlowModeDelay int    `txtdb:"slow_mode_delay"`
 }
 
-func (c Chat) Key() string {
-	return strconv.FormatInt(int64(c.ID), 10)
+func (c Chat) Key() (string, string) {
+	return "id", strconv.FormatInt(int64(c.ID), 10)
 }
 
 func (c Chat) Format() string {
@@ -44,8 +44,8 @@ type User struct {
 	CanReadAllGroupMessages bool   `txtdb:"can_read_all_group_messages"`
 }
 
-func (u User) Key() string {
-	return u.Username
+func (u User) Key() (string, string) {
+	return "username", u.Username
 }
 
 func (u User) Format() string {
@@ -66,8 +66,8 @@ type Zhuk struct {
 	RoleID int    `txtdb:"role_id"`
 }
 
-func (z Zhuk) Key() string {
-	return strconv.FormatInt(int64(z.ID), 10)
+func (z Zhuk) Key() (string, string) {
+	return "id", strconv.FormatInt(int64(z.ID), 10)
 }
 
 func (z Zhuk) Format() string {

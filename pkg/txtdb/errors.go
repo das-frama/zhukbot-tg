@@ -2,4 +2,5 @@ package txtdb
 
 import "errors"
 
-var ErrNotFound = errors.New("the record not found")
+var ErrNotFound = errors.New("record not found")
+var ErrAlreadyExists = errors.New("record already exists")

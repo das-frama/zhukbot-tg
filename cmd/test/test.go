@@ -2,7 +2,6 @@ package main
 
 import (
 	"das-frama/zhukbot-tg/pkg/txtdb"
-	"fmt"
 	"log"
 )
 
@@ -13,14 +12,9 @@ func main() {
 	}
 	defer db.Close()
 
-	user, err := db.FetchByUsername("users.txt", "Who_knowsme")
-	if err != nil {
-		log.Fatalln(err)
+	user := txtdb.User{
+		Username: "das_frama",
 	}
-	fmt.Println(user)
-
-	err = db.Delete("users.txt", user)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// db.Insert("users.txt", user)
+	db.Delete("users.txt", user)
 }

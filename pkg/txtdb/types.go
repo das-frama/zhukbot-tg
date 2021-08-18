@@ -54,7 +54,7 @@ func (u User) Format() string {
 }
 
 func (u User) ToString() string {
-	return fmt.Sprintf(u.Format(), u.Username, u.FirstName, u.LastName, u.LanguageCode, u.CanJoinGroups, u.CanReadAllGroupMessages)
+	return fmt.Sprintf(u.Format(), u.ID, u.Username, u.FirstName, u.LastName, u.LanguageCode, u.CanJoinGroups, u.CanReadAllGroupMessages)
 }
 
 // Zhuk
